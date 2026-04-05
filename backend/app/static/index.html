@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Учёт материальных ресурсов</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg0: #080c14;
+      --bg1: #0f1629;
+      --surface: rgba(255, 255, 255, 0.055);
+      --surface2: rgba(255, 255, 255, 0.09);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #f1f5ff;
+      --muted: #94a3c8;
+      --accent1: #6366f1;
+      --accent2: #a855f7;
+      --accent3: #22d3ee;
+      --danger: #fb7185;
+      --success: #4ade80;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+      --font: "Plus Jakarta Sans", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(99, 102, 241, 0.22), transparent),
+        radial-gradient(900px 500px at 100% 0%, rgba(168, 85, 247, 0.18), transparent),
+        radial-gradient(700px 400px at 50% 100%, rgba(34, 211, 238, 0.08), transparent),
+        linear-gradient(165deg, var(--bg0), var(--bg1));
+      line-height: 1.55;
+    }
+    .hidden { display: none !important; }
+    .screen { min-height: 100vh; padding: 1.25rem; }
+    #auth-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 2rem 2rem 1.75rem;
+      border-radius: calc(var(--radius) + 4px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+    .brand {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 0.75rem;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.35);
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .brand p {
+      margin: 0.35rem 0 0;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+    .auth-switch {
+      display: flex;
+      gap: 0.35rem;
+      margin: 1.5rem 0 1.25rem;
+      padding: 4px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+    }
+    .auth-switch button {
+      flex: 1;
+      border: none;
+      border-radius: 9px;
+      padding: 0.55rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: background 0.2s, color 0.2s;
+    }
+    .auth-switch button.active {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+    }
+    .field {
+      margin-bottom: 1rem;
+    }
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus, .field select:focus {
+      outline: none;
+      border-color: rgba(99, 102, 241, 0.65);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .btn {
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.7rem 1.1rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary {
+      width: 100%;
+      margin-top: 0.25rem;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      box-shadow: 0 8px 28px rgba(99, 102, 241, 0.4);
+    }
+    .btn-primary:hover { opacity: 0.95; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+    .btn-danger-outline {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(251, 113, 133, 0.45);
+      font-size: 0.8rem;
+      padding: 0.4rem 0.65rem;
+    }
+    .hint-box {
+      margin-top: 1.25rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      background: rgba(34, 211, 238, 0.08);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .hint-box strong { color: var(--accent3); }
+
+    /* App layout */
+    #app-screen { padding: 0; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem 1rem;
+      padding: 0.85rem 1.25rem;
+      background: rgba(8, 12, 20, 0.72);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .topbar-brand .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent1), var(--accent3));
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.8);
+    }
+    .topbar-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      flex: 1;
+      justify-content: center;
+    }
+    .topbar-tabs button {
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .topbar-tabs button:hover { color: var(--text); background: var(--surface); }
+    .topbar-tabs button.active {
+      color: #fff;
+      background: var(--surface2);
+      border-color: var(--border);
+    }
+    .user-area {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.75rem 0.35rem 0.45rem;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: #fff;
+    }
+    .role-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+      background: rgba(99, 102, 241, 0.25);
+      color: #c4b5fd;
+    }
+    .role-badge.admin { background: rgba(251, 191, 36, 0.2); color: #fcd34d; }
+
+    .main-wrap { max-width: 1120px; margin: 0 auto; padding: 1.25rem 1.25rem 2.5rem; }
+    .panel {
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.35rem 1.5rem;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+    }
+    .panel h2 {
+      margin: 0 0 1.1rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .form-grid {
+      display: grid;
+      gap: 0.85rem;
+      margin-bottom: 1.1rem;
+    }
+    @media (min-width: 560px) {
+      .form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    }
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.65rem;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .msg {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .msg.error {
+      background: rgba(251, 113, 133, 0.12);
+      border: 1px solid rgba(251, 113, 133, 0.35);
+      color: #fecdd3;
+    }
+    .msg.ok {
+      background: rgba(74, 222, 128, 0.12);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: #bbf7d0;
+    }
+    .subtle { color: var(--muted); font-size: 0.85rem; margin-top: 0.75rem; }
+    .footer-mini {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .footer-mini a { color: var(--accent3); text-decoration: none; }
+    .footer-mini a:hover { text-decoration: underline; }
+    .admin-grid {
+      display: grid;
+      gap: 1.25rem;
+    }
+    @media (min-width: 800px) {
+      .admin-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="auth-screen" class="screen">
+    <div class="auth-card">
+      <div class="brand">
+        <div class="brand-icon">📦</div>
+        <h1>Учёт материалов</h1>
+        <p>Войдите или создайте аккаунт сотрудника</p>
+      </div>
+      <div class="auth-switch">
+        <button type="button" id="tabLogin" class="active">Вход</button>
+        <button type="button" id="tabReg">Регистрация</button>
+      </div>
+      <div id="msgAuth"></div>
+      <form id="formLogin">
+        <div class="field">
+          <label>Логин</label>
+          <input name="username" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label>Пароль</label>
+          <input name="password" type="password" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Войти</button>
+      </form>
+      <form id="formReg" class="hidden">
+        <div class="field">
+          <label>Логин</label>
+          <input name="username" autocomplete="username" minlength="3" required />
+        </div>
+        <div class="field">
+          <label>Как к вам обращаться</label>
+          <input name="full_name" placeholder="Необязательно" />
+        </div>
+        <div class="field">
+          <label>Пароль (от 6 символов)</label>
+          <input name="password" type="password" autocomplete="new-password" minlength="6" required />
+        </div>
+        <div class="field">
+          <label>Повтор пароля</label>
+          <input name="password2" type="password" autocomplete="new-password" minlength="6" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Создать аккаунт</button>
+      </form>
+      <div class="hint-box">
+        <strong>Администратор по умолчанию:</strong> логин <code>admin</code>, пароль <code>admin</code>
+        (задаётся при первом запуске, если база пустая). Смените через переменные окружения
+        <code>INITIAL_ADMIN_PASSWORD</code> / <code>JWT_SECRET</code> для продакшена.
+      </div>
+    </div>
+  </div>
+
+  <div id="app-screen" class="screen hidden">
+    <header class="topbar">
+      <div class="topbar-brand"><span class="dot"></span> Учёт ТМЦ</div>
+      <nav class="topbar-tabs" id="mainTabs">
+        <button type="button" data-tab="nom" class="active">Номенклатура</button>
+        <button type="button" data-tab="wh">Склады</button>
+        <button type="button" data-tab="mov">Движения</button>
+        <button type="button" data-tab="bal">Остатки</button>
+        <button type="button" data-tab="admin" id="tabAdmin" class="hidden">Пользователи</button>
+      </nav>
+      <div class="user-area">
+        <div class="user-pill">
+          <div class="user-avatar" id="userAvatar">?</div>
+          <div>
+            <div id="userDisplayName" style="font-weight:600">—</div>
+            <div id="userLogin" style="font-size:0.72rem;color:var(--muted)">—</div>
+          </div>
+          <span class="role-badge" id="roleBadge">user</span>
+        </div>
+        <button type="button" class="btn btn-ghost" id="btnLogout">Выйти</button>
+      </div>
+    </header>
+    <div class="main-wrap">
+      <div id="msgApp"></div>
+      <div class="toolbar-row">
+        <button type="button" class="btn btn-ghost" id="btnXml">⬇ Скачать XML (1С)</button>
+        <button type="button" class="btn btn-ghost" id="btnRefresh">Обновить</button>
+      </div>
+
+      <div id="panel-nom" class="panel">
+        <h2>Номенклатура</h2>
+        <form id="formNom" class="form-grid cols-2">
+          <div class="field"><label>Артикул (SKU)</label><input name="sku" required /></div>
+          <div class="field"><label>Ед. изм.</label><input name="unit" value="шт" /></div>
+          <div class="field" style="grid-column:1/-1"><label>Наименование</label><input name="name" required /></div>
+          <div><button type="submit" class="btn btn-primary" style="width:auto">Добавить</button></div>
+        </form>
+        <table><thead><tr><th>SKU</th><th>Наименование</th><th>Ед.</th><th class="admin-only"></th></tr></thead><tbody id="tblNom"></tbody></table>
+      </div>
+
+      <div id="panel-wh" class="panel hidden">
+        <h2>Склады</h2>
+        <form id="formWh" class="form-grid cols-2">
+          <div class="field"><label>Код</label><input name="code" required /></div>
+          <div class="field"><label>Наименование</label><input name="name" required /></div>
+          <div><button type="submit" class="btn btn-primary" style="width:auto">Добавить склад</button></div>
+        </form>
+        <table><thead><tr><th>Код</th><th>Наименование</th><th class="admin-only"></th></tr></thead><tbody id="tblWh"></tbody></table>
+      </div>
+
+      <div id="panel-mov" class="panel hidden">
+        <h2>Движение товаров</h2>
+        <form id="formMov" class="form-grid cols-2">
+          <div class="field"><label>№ документа</label><input name="doc_number" required /></div>
+          <div class="field"><label>Тип</label>
+            <select name="movement_type">
+              <option value="receipt">Приход</option>
+              <option value="issue">Расход</option>
+              <option value="transfer">Перемещение</option>
+            </select>
+          </div>
+          <div class="field"><label>Номенклатура</label><select name="nomenclature_id" id="selNom" required><option value="">— выберите —</option></select></div>
+          <div class="field"><label>Количество</label><input name="quantity" type="number" step="any" min="0.000001" required /></div>
+          <div class="field"><label>Склад «куда»</label><select name="warehouse_to_id" id="selTo"><option value="">—</option></select></div>
+          <div class="field"><label>Склад «откуда»</label><select name="warehouse_from_id" id="selFrom"><option value="">—</option></select></div>
+          <div class="field" style="grid-column:1/-1"><label>Примечание</label><input name="note" /></div>
+          <div><button type="submit" class="btn btn-primary" style="width:auto">Провести документ</button></div>
+        </form>
+        <p class="subtle">Приход — склад «куда». Расход — «откуда». Перемещение — оба склада; остаток проверяется.</p>
+        <table><thead><tr><th>Док.</th><th>Тип</th><th>Кол-во</th><th>Откуда → Куда</th><th>Дата</th></tr></thead><tbody id="tblMov"></tbody></table>
+      </div>
+
+      <div id="panel-bal" class="panel hidden">
+        <h2>Остатки по складам</h2>
+        <table><thead><tr><th>SKU</th><th>ТМЦ</th><th>Склад</th><th>Остаток</th><th>Ед.</th></tr></thead><tbody id="tblBal"></tbody></table>
+        <p id="balEmpty" class="subtle hidden">Нет ненулевых остатков.</p>
+      </div>
+
+      <div id="panel-admin" class="panel hidden">
+        <h2>Пользователи (только администратор)</h2>
+        <div class="admin-grid">
+          <div>
+            <h3 style="margin:0 0 0.75rem;font-size:0.95rem">Новый пользователь</h3>
+            <form id="formAdminUser" class="form-grid">
+              <div class="field"><label>Логин</label><input name="username" required minlength="3" /></div>
+              <div class="field"><label>Имя</label><input name="full_name" placeholder="Необязательно" /></div>
+              <div class="field"><label>Пароль</label><input name="password" type="password" minlength="6" required /></div>
+              <div class="field"><label>Роль</label>
+                <select name="role">
+                  <option value="user">Сотрудник</option>
+                  <option value="admin">Администратор</option>
+                </select>
+              </div>
+              <div><button type="submit" class="btn btn-primary" style="width:auto">Создать</button></div>
+            </form>
+          </div>
+          <div>
+            <h3 style="margin:0 0 0.75rem;font-size:0.95rem">Список</h3>
+            <table><thead><tr><th>Логин</th><th>Имя</th><th>Роль</th></tr></thead><tbody id="tblUsers"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <p class="footer-mini"><a href="/docs">API (Swagger)</a> · <a href="/health">health</a></p>
+    </div>
+  </div>
+
+  <script>
+    const LS = "ma_token";
+    let token = localStorage.getItem(LS) || null;
+    let role = null;
+    let username = null;
+    let fullName = null;
+
+    function escapeHtml(s) {
+      const d = document.createElement("div");
+      d.textContent = s == null ? "" : String(s);
+      return d.innerHTML;
+    }
+
+    function showAuthMsg(type, text) {
+      const el = document.getElementById("msgAuth");
+      el.innerHTML = text ? `<div class="msg ${type}">${escapeHtml(text)}</div>` : "";
+    }
+    function showAppMsg(type, text) {
+      const el = document.getElementById("msgApp");
+      el.innerHTML = text ? `<div class="msg ${type}">${escapeHtml(text)}` : "";
+      if (text) setTimeout(() => { el.innerHTML = ""; }, 5000);
+    }
+
+    async function api(path, options = {}) {
+      const headers = { ...options.headers };
+      if (!(options.body instanceof FormData))
+        headers["Content-Type"] = "application/json";
+      if (token) headers["Authorization"] = "Bearer " + token;
+      const res = await fetch(path, { ...options, headers });
+      const text = await res.text();
+      let data;
+      try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+      if (res.status === 401) {
+        logout();
+        throw new Error("Сессия истекла — войдите снова");
+      }
+      if (!res.ok) {
+        const detail = data && typeof data === "object" && data.detail
+          ? (typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail))
+          : String(data || res.statusText);
+        throw new Error(detail);
+      }
+      return data;
+    }
+
+    function setSession(t, r, u, fn) {
+      token = t;
+      role = r;
+      username = u;
+      fullName = fn;
+      if (t) localStorage.setItem(LS, t);
+      else localStorage.removeItem(LS);
+    }
+
+    function logout() {
+      setSession(null, null, null, null);
+      document.getElementById("app-screen").classList.add("hidden");
+      document.getElementById("auth-screen").classList.remove("hidden");
+    }
+
+    function applyRoleUi() {
+      const isAdmin = role === "admin";
+      document.querySelectorAll(".admin-only").forEach((th) => {
+        th.style.display = isAdmin ? "" : "none";
+      });
+      document.getElementById("tabAdmin").classList.toggle("hidden", !isAdmin);
+      const badge = document.getElementById("roleBadge");
+      badge.textContent = isAdmin ? "админ" : "сотрудник";
+      badge.classList.toggle("admin", isAdmin);
+    }
+
+    function updateUserPill() {
+      const disp = fullName || username || "—";
+      document.getElementById("userDisplayName").textContent = disp;
+      document.getElementById("userLogin").textContent = "@" + (username || "");
+      const av = (disp[0] || "?").toUpperCase();
+      document.getElementById("userAvatar").textContent = av;
+    }
+
+    async function tryResume() {
+      if (!token) return false;
+      try {
+        const me = await api("/api/auth/me");
+        setSession(token, me.role, me.username, me.full_name);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function showApp() {
+      document.getElementById("auth-screen").classList.add("hidden");
+      document.getElementById("app-screen").classList.remove("hidden");
+      updateUserPill();
+      applyRoleUi();
+      refresh();
+      if (role === "admin") loadUsers();
+    }
+
+    document.getElementById("tabLogin").addEventListener("click", () => {
+      document.getElementById("tabLogin").classList.add("active");
+      document.getElementById("tabReg").classList.remove("active");
+      document.getElementById("formLogin").classList.remove("hidden");
+      document.getElementById("formReg").classList.add("hidden");
+      showAuthMsg("", "");
+    });
+    document.getElementById("tabReg").addEventListener("click", () => {
+      document.getElementById("tabReg").classList.add("active");
+      document.getElementById("tabLogin").classList.remove("active");
+      document.getElementById("formReg").classList.remove("hidden");
+      document.getElementById("formLogin").classList.add("hidden");
+      showAuthMsg("", "");
+    });
+
+    document.getElementById("formLogin").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      try {
+        const data = await api("/api/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ username: f.username.value, password: f.password.value }),
+        });
+        setSession(data.access_token, data.role, data.username, data.full_name);
+        f.reset();
+        showAuthMsg("", "");
+        showApp();
+      } catch (err) {
+        showAuthMsg("error", err.message);
+      }
+    });
+
+    document.getElementById("formReg").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      if (f.password.value !== f.password2.value) {
+        showAuthMsg("error", "Пароли не совпадают");
+        return;
+      }
+      try {
+        const body = {
+          username: f.username.value.trim(),
+          password: f.password.value,
+          full_name: f.full_name.value.trim() || null,
+        };
+        const data = await api("/api/auth/register", { method: "POST", body: JSON.stringify(body) });
+        setSession(data.access_token, data.role, data.username, data.full_name);
+        f.reset();
+        showAuthMsg("", "");
+        showApp();
+      } catch (err) {
+        showAuthMsg("error", err.message);
+      }
+    });
+
+    document.getElementById("btnLogout").addEventListener("click", logout);
+
+    const movLabels = { receipt: "Приход", issue: "Расход", transfer: "Перемещение" };
+
+    async function refresh() {
+      try {
+        const [n, w, m, b] = await Promise.all([
+          api("/api/nomenclature"),
+          api("/api/warehouses"),
+          api("/api/movements"),
+          api("/api/balances"),
+        ]);
+        renderNom(n);
+        renderWh(w);
+        renderMov(m);
+        renderBal(b);
+        fillSelects(n, w);
+        if (role === "admin") loadUsers();
+      } catch (e) {
+        showAppMsg("error", e.message || String(e));
+      }
+    }
+
+    function renderNom(rows) {
+      const del = role === "admin";
+      document.getElementById("tblNom").innerHTML = rows.map((r) => `
+        <tr>
+          <td>${escapeHtml(r.sku)}</td>
+          <td>${escapeHtml(r.name)}</td>
+          <td>${escapeHtml(r.unit)}</td>
+          ${del ? `<td><button type="button" class="btn btn-danger-outline" data-del-nom="${r.id}">Удалить</button></td>` : "<td></td>"}
+        </tr>`).join("");
+    }
+    function renderWh(rows) {
+      const del = role === "admin";
+      document.getElementById("tblWh").innerHTML = rows.map((r) => `
+        <tr>
+          <td>${escapeHtml(r.code)}</td>
+          <td>${escapeHtml(r.name)}</td>
+          ${del ? `<td><button type="button" class="btn btn-danger-outline" data-del-wh="${r.id}">Удалить</button></td>` : "<td></td>"}
+        </tr>`).join("");
+    }
+    function renderMov(rows) {
+      document.getElementById("tblMov").innerHTML = rows.map((r) => {
+        const d = r.created_at ? new Date(r.created_at).toLocaleString("ru-RU") : "";
+        return `<tr>
+          <td>${escapeHtml(r.doc_number)}</td>
+          <td>${escapeHtml(movLabels[r.movement_type] || r.movement_type)}</td>
+          <td>${r.quantity}</td>
+          <td>${r.warehouse_from_id ?? "—"} → ${r.warehouse_to_id ?? "—"}</td>
+          <td>${escapeHtml(d)}</td>
+        </tr>`;
+      }).join("");
+    }
+    function renderBal(rows) {
+      document.getElementById("tblBal").innerHTML = rows.map((b) => `
+        <tr>
+          <td>${escapeHtml(b.sku)}</td>
+          <td>${escapeHtml(b.name)}</td>
+          <td>${escapeHtml(b.warehouse_code)} — ${escapeHtml(b.warehouse_name)}</td>
+          <td>${b.quantity}</td>
+          <td>${escapeHtml(b.unit)}</td>
+        </tr>`).join("");
+      document.getElementById("balEmpty").classList.toggle("hidden", rows.length > 0);
+    }
+    function fillSelects(n, w) {
+      const selNom = document.getElementById("selNom");
+      const v = selNom.value;
+      selNom.innerHTML = '<option value="">— выберите —</option>' +
+        n.map((r) => `<option value="${r.id}">${escapeHtml(r.sku)} — ${escapeHtml(r.name)}</option>`).join("");
+      if (v) selNom.value = v;
+      const opts = '<option value="">—</option>' + w.map((r) => `<option value="${r.id}">${escapeHtml(r.code)}</option>`).join("");
+      document.getElementById("selTo").innerHTML = opts;
+      document.getElementById("selFrom").innerHTML = opts;
+    }
+
+    async function loadUsers() {
+      if (role !== "admin") return;
+      try {
+        const rows = await api("/api/admin/users");
+        document.getElementById("tblUsers").innerHTML = rows.map((u) => `
+          <tr>
+            <td>${escapeHtml(u.username)}</td>
+            <td>${escapeHtml(u.full_name || "—")}</td>
+            <td>${u.role === "admin" ? "Админ" : "Сотрудник"}</td>
+          </tr>`).join("");
+      } catch (e) {
+        showAppMsg("error", e.message);
+      }
+    }
+
+    document.querySelectorAll("#mainTabs button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.id === "tabAdmin" && role !== "admin") return;
+        document.querySelectorAll("#mainTabs button").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const id = btn.getAttribute("data-tab");
+        document.querySelectorAll(".main-wrap .panel").forEach((p) => p.classList.add("hidden"));
+        document.getElementById("panel-" + id).classList.remove("hidden");
+        if (id === "admin") loadUsers();
+      });
+    });
+
+    document.getElementById("btnRefresh").addEventListener("click", refresh);
+    document.getElementById("btnXml").addEventListener("click", async () => {
+      if (!token) return;
+      try {
+        const res = await fetch("/api/export/1c-commerceml", {
+          headers: { Authorization: "Bearer " + token },
+        });
+        if (res.status === 401) {
+          logout();
+          return;
+        }
+        if (!res.ok) throw new Error("Не удалось скачать файл");
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "material_balances_commerceml.xml";
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        showAppMsg("error", e.message || String(e));
+      }
+    });
+
+    document.getElementById("formNom").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      try {
+        await api("/api/nomenclature", {
+          method: "POST",
+          body: JSON.stringify({
+            sku: f.sku.value.trim(),
+            name: f.name.value.trim(),
+            unit: (f.unit.value || "шт").trim(),
+          }),
+        });
+        f.reset();
+        f.unit.value = "шт";
+        showAppMsg("ok", "Номенклатура добавлена");
+        refresh();
+      } catch (err) { showAppMsg("error", err.message); }
+    });
+
+    document.getElementById("formWh").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      try {
+        await api("/api/warehouses", {
+          method: "POST",
+          body: JSON.stringify({ code: f.code.value.trim(), name: f.name.value.trim() }),
+        });
+        f.reset();
+        showAppMsg("ok", "Склад добавлен");
+        refresh();
+      } catch (err) { showAppMsg("error", err.message); }
+    });
+
+    document.querySelector("#formMov select[name='movement_type']").addEventListener("change", (e) => {
+      const t = e.target.value;
+      if (t === "receipt") document.getElementById("selFrom").value = "";
+      if (t === "issue") document.getElementById("selTo").value = "";
+    });
+
+    document.getElementById("formMov").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const body = {
+        doc_number: f.doc_number.value.trim(),
+        movement_type: f.movement_type.value,
+        nomenclature_id: Number(f.nomenclature_id.value),
+        quantity: Number(f.quantity.value),
+        warehouse_to_id: f.warehouse_to_id.value ? Number(f.warehouse_to_id.value) : null,
+        warehouse_from_id: f.warehouse_from_id.value ? Number(f.warehouse_from_id.value) : null,
+        note: f.note.value.trim() || null,
+      };
+      try {
+        await api("/api/movements", { method: "POST", body: JSON.stringify(body) });
+        f.doc_number.value = "";
+        f.quantity.value = "";
+        f.note.value = "";
+        showAppMsg("ok", "Документ проведён");
+        refresh();
+      } catch (err) { showAppMsg("error", err.message); }
+    });
+
+    document.getElementById("formAdminUser").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+      try {
+        await api("/api/admin/users", {
+          method: "POST",
+          body: JSON.stringify({
+            username: f.username.value.trim(),
+            password: f.password.value,
+            full_name: f.full_name.value.trim() || null,
+            role: f.role.value,
+          }),
+        });
+        f.reset();
+        showAppMsg("ok", "Пользователь создан");
+        loadUsers();
+      } catch (err) { showAppMsg("error", err.message); }
+    });
+
+    document.body.addEventListener("click", async (e) => {
+      const n = e.target.getAttribute("data-del-nom");
+      const w = e.target.getAttribute("data-del-wh");
+      if (n) {
+        if (!confirm("Удалить номенклатуру?")) return;
+        try {
+          await api("/api/nomenclature/" + n, { method: "DELETE" });
+          showAppMsg("ok", "Удалено");
+          refresh();
+        } catch (err) { showAppMsg("error", err.message); }
+      }
+      if (w) {
+        if (!confirm("Удалить склад?")) return;
+        try {
+          await api("/api/warehouses/" + w, { method: "DELETE" });
+          showAppMsg("ok", "Удалено");
+          refresh();
+        } catch (err) { showAppMsg("error", err.message); }
+      }
+    });
+
+    (async function init() {
+      if (await tryResume()) showApp();
+    })();
+  </script>
+</body>
+</html>
