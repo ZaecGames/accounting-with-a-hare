@@ -17,7 +17,11 @@ from .auth_core import (
     hash_password,
     verify_password,
 )
-from .config import INITIAL_ADMIN_PASSWORD, INITIAL_ADMIN_USERNAME
+from .config import (
+    INITIAL_ADMIN_PASSWORD,
+    INITIAL_ADMIN_USERNAME,
+    cors_allow_origins,
+)
 from .deps import get_current_user, require_admin
 from .models import MovementType, UserRole
 from .services import (
@@ -56,15 +60,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+_cors_origins, _cors_creds = cors_allow_origins()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-    ],
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=_cors_creds,
     allow_methods=["*"],
     allow_headers=["*"],
 )

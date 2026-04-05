@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { apiUrl } from "./apiBase.js";
 
 const LS = "ma_token";
 
@@ -23,8 +24,8 @@ function AuthScreen({ onLoggedIn }) {
     password2: "",
   });
 
-  async function postAuth(url, body) {
-    const res = await fetch(url, {
+  async function postAuth(path, body) {
+    const res = await fetch(apiUrl(path), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -224,7 +225,7 @@ export default function App() {
         ...options.headers,
       };
       if (token) headers.Authorization = `Bearer ${token}`;
-      const res = await fetch(path, { ...options, headers });
+      const res = await fetch(apiUrl(path), { ...options, headers });
       const text = await res.text();
       let data;
       try {
@@ -258,7 +259,7 @@ export default function App() {
     }
     let cancel = false;
     setBooting(true);
-    fetch("/api/auth/me", {
+    fetch(apiUrl("/api/auth/me"), {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
@@ -488,7 +489,7 @@ function MainApp({ user, logout, api, token }) {
 
   async function exportXml() {
     try {
-      const res = await fetch("/api/export/1c-commerceml", {
+      const res = await fetch(apiUrl("/api/export/1c-commerceml"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) {
@@ -981,7 +982,9 @@ function MainApp({ user, logout, api, token }) {
         )}
 
         <p className="footer-mini">
-          <a href="/docs">API (Swagger)</a>
+          <a href={apiUrl("/docs")} target="_blank" rel="noreferrer">
+            API (Swagger)
+          </a>
         </p>
       </div>
     </div>

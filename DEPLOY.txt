@@ -1,0 +1,21 @@
+=== Локально (всё на одном ПК) ===
+1) Терминал: cd backend → venv → uvicorn (см. start-backend.ps1).
+2) Браузер: http://127.0.0.1:8000/
+   Или фронт Vite: cd frontend → npm install → npm run dev → http://localhost:5173
+
+=== Vercel (только React) + Render (API) ===
+1) Задеплойте backend на Render (Blueprint из render.yaml или вручную):
+   - Root Directory: backend
+   - Build:  pip install -r requirements.txt
+   - Start:  uvicorn app.main:app --host 0.0.0.0 --port $PORT
+2) В Render → Environment:
+   - JWT_SECRET = длинная случайная строка
+   - CORS_ORIGINS = *   (или https://ваш-проект.vercel.app через запятую)
+3) Скопируйте URL сервиса, например https://diplom-material-api.onrender.com
+4) Vercel → Import репозитория:
+   - Root Directory: корень репо (используется vercel.json в корне).
+   - Environment Variables: VITE_API_URL = https://diplom-material-api.onrender.com
+   - Без слэша на конце.
+5) Deploy / Redeploy фронта.
+
+SQLite на Render хранится на диске инстанса (при «засыпании» free tier данные обычно сохраняются; при удалении сервиса — нет).

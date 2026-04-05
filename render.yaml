@@ -1,0 +1,17 @@
+# https://render.com/docs/blueprint-spec
+# New Blueprint → подключите репозиторий; сервис поднимет API из папки backend.
+services:
+  - type: web
+    name: diplom-material-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: CORS_ORIGINS
+        sync: false
+      - key: JWT_SECRET
+        sync: false

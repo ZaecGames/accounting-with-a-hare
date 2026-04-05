@@ -1,0 +1,79 @@
+================================================================================
+  КАК ЗАГРУЗИТЬ ПРОЕКТ НА GITHUB И ВЫЛОЖИТЬ САЙТ В ИНТЕРНЕТ
+================================================================================
+
+ЧТО УЖЕ ГОТОВО В ПАПКЕ ПРОЕКТА
+------------------------------
+  .gitignore      — лишнее (пароли, база, venv) не попадёт в GitHub
+  README.md       — описание для страницы репозитория
+  vercel.json     — настройка сайта на Vercel
+  render.yaml     — шаблон для API на Render (бесплатный хостинг)
+
+Перед загрузкой можно УДАЛИТЬ папки (они не нужны в архиве и всё равно
+игнорируются Git): backend\.venv, frontend\node_modules — экономия места.
+
+
+ШАГ 1. УСТАНОВИТЕ GIT
+----------------------
+  Скачайте: https://git-scm.com/download/win
+  После установки перезапустите терминал (PowerShell или cmd).
+
+
+ШАГ 2. СОЗДАЙТЕ РЕПОЗИТОРИЙ НА GITHUB
+--------------------------------------
+  Зайдите на https://github.com → Sign in → кнопка "+" → New repository
+  Имя, например: diplom-material
+  Без галочки "Add README" (у вас уже есть файлы)
+  Create repository — скопируйте адрес, например:
+  https://github.com/ВАШ_ЛОГИН/diplom-material.git
+
+
+ШАГ 3. ОТПРАВЬТЕ КОД С КОМПЬЮТЕРА (PowerShell)
+----------------------------------------------
+  Откройте PowerShell, выполните по очереди (путь замените на свой):
+
+  cd C:\Users\zaec1\Desktop\Diplom
+
+  git init
+  git add .
+  git status
+  (убедитесь, что НЕТ файлов .db, .venv, node_modules в списке)
+
+  git commit -m "Первый коммит: диплом учет ТМЦ"
+  git branch -M main
+  git remote add origin https://github.com/ВАШ_ЛОГИН/diplom-material.git
+  git push -u origin main
+
+  (GitHub может спросить логин и пароль; для пароля используйте Personal
+   Access Token: GitHub → Settings → Developer settings → Tokens)
+
+
+ШАГ 4. САЙТ В ИНТЕРНЕТЕ (две бесплатные части)
+---------------------------------------------
+  A) API (сервер с базой) — Render.com
+     - Зарегистрируйтесь на https://render.com
+     - New → Blueprint → подключите репозиторий GitHub
+     - Или Web Service: Root Directory = backend, команды из render.yaml
+     - В Environment задайте: JWT_SECRET (любая длинная строка),
+       CORS_ORIGINS = *
+     - Скопируйте URL сервиса, например: https://xxx.onrender.com
+
+  B) Страница для пользователей — Vercel.com
+     - Зайдите на https://vercel.com → Add New → Project → Import из GitHub
+     - Выберите этот репозиторий, корень проекта не меняйте
+     - Environment Variables:
+         VITE_API_URL = https://xxx.onrender.com
+       (без слэша в конце — тот URL, что дал Render)
+     - Deploy
+
+После деплоя Vercel даст ссылку вида https://....vercel.app — это адрес
+вашего сайта в сети.
+
+
+ЛОКАЛЬНО БЕЗ ИНТЕРНЕТА
+----------------------
+  cd backend
+  .\.venv\Scripts\python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+  Браузер: http://127.0.0.1:8000/
+
+================================================================================
